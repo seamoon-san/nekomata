@@ -1,6 +1,7 @@
-# Nekomata
+# nekomata
+_(Chinese version readme at before)_
 
-Nekomata is a translation tool designed for RPG Maker games, supporting RPG Maker MV, MZ, VX, and VX Ace. It provides a modern UI for managing translation projects and editing game text.
+nekomata is a translation tool designed for RPG Maker games, **supporting RPG Maker MV, MZ, VX, and VX Ace**. It provides a modern UI for managing translation projects and editing game text.
 
 ## Features
 
@@ -51,9 +52,9 @@ This project is licensed under the LGPL-3.0 License - see the [LICENSE](LICENSE)
 
 ---
 
-# Nekomata (中文)
+# nekomata (中文)
 
-Nekomata 是一个专为 RPG Maker 游戏设计的翻译工具，支持 RPG Maker MV, MZ, VX, 和 VX Ace。它提供了一个现代化的界面来管理翻译项目和编辑游戏文本。
+nekomata 是一个专为 RPG Maker 游戏设计的翻译工具，支持 **RPG Maker MV, MZ, VX, 和 VX Ace**。它提供了一个现代化的界面来管理翻译项目和编辑游戏文本。
 
 ## 功能特性
 
