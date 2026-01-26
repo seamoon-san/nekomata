@@ -1,11 +1,27 @@
-bin/
-obj/
+# Build results
+[Bb]in/
+[Oo]bj/
+dist/
+
+# Visual Studio
 .vs/
 .vscode/
 *.user
 *.suo
+*.userprefs
+
+# Database
 *.db
 *.db-shm
 *.db-wal
+
+# Logs
 logs/
+*.log
+
+# Trae
 .trae/
+
+# OS generated
+.DS_Store
+Thumbs.db
