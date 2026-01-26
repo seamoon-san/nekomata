@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9EAFD8B8-D1BA-4397-8931-AD3F1EBF51E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nekomata.Core", "src\Nekomata.Core\Nekomata.Core.csproj", "{FE70AEF0-C3EE-43A8-8206-7282C9C49B60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nekomata.EngineAdapters", "src\Nekomata.EngineAdapters\Nekomata.EngineAdapters.csproj", "{45B3BF74-8808-44FB-AAAD-DB07FEDBEE91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nekomata.Models", "src\Nekomata.Models\Nekomata.Models.csproj", "{1392F018-7AFF-4B96-A470-174E8871D914}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nekomata.Infrastructure", "src\Nekomata.Infrastructure\Nekomata.Infrastructure.csproj", "{347795B5-A27A-4598-8C21-552C9E73B7D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nekomata.UI", "src\Nekomata.UI\Nekomata.UI.csproj", "{CC26B811-693C-47A9-BC01-6B5129F931F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nekomata.Tests", "src\Nekomata.Tests\Nekomata.Tests.csproj", "{A323ED7A-C77E-4770-8831-E7F7CA707DBD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FE70AEF0-C3EE-43A8-8206-7282C9C49B60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE70AEF0-C3EE-43A8-8206-7282C9C49B60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE70AEF0-C3EE-43A8-8206-7282C9C49B60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE70AEF0-C3EE-43A8-8206-7282C9C49B60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45B3BF74-8808-44FB-AAAD-DB07FEDBEE91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45B3BF74-8808-44FB-AAAD-DB07FEDBEE91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45B3BF74-8808-44FB-AAAD-DB07FEDBEE91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45B3BF74-8808-44FB-AAAD-DB07FEDBEE91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1392F018-7AFF-4B96-A470-174E8871D914}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1392F018-7AFF-4B96-A470-174E8871D914}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1392F018-7AFF-4B96-A470-174E8871D914}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1392F018-7AFF-4B96-A470-174E8871D914}.Release|Any CPU.Build.0 = Release|Any CPU
+		{347795B5-A27A-4598-8C21-552C9E73B7D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{347795B5-A27A-4598-8C21-552C9E73B7D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{347795B5-A27A-4598-8C21-552C9E73B7D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{347795B5-A27A-4598-8C21-552C9E73B7D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC26B811-693C-47A9-BC01-6B5129F931F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC26B811-693C-47A9-BC01-6B5129F931F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC26B811-693C-47A9-BC01-6B5129F931F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC26B811-693C-47A9-BC01-6B5129F931F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A323ED7A-C77E-4770-8831-E7F7CA707DBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A323ED7A-C77E-4770-8831-E7F7CA707DBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A323ED7A-C77E-4770-8831-E7F7CA707DBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A323ED7A-C77E-4770-8831-E7F7CA707DBD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FE70AEF0-C3EE-43A8-8206-7282C9C49B60} = {9EAFD8B8-D1BA-4397-8931-AD3F1EBF51E8}
+		{45B3BF74-8808-44FB-AAAD-DB07FEDBEE91} = {9EAFD8B8-D1BA-4397-8931-AD3F1EBF51E8}
+		{1392F018-7AFF-4B96-A470-174E8871D914} = {9EAFD8B8-D1BA-4397-8931-AD3F1EBF51E8}
+		{347795B5-A27A-4598-8C21-552C9E73B7D0} = {9EAFD8B8-D1BA-4397-8931-AD3F1EBF51E8}
+		{CC26B811-693C-47A9-BC01-6B5129F931F2} = {9EAFD8B8-D1BA-4397-8931-AD3F1EBF51E8}
+		{A323ED7A-C77E-4770-8831-E7F7CA707DBD} = {9EAFD8B8-D1BA-4397-8931-AD3F1EBF51E8}
+	EndGlobalSection
+EndGlobal

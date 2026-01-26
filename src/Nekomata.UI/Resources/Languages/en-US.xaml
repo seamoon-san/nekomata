@@ -1,0 +1,81 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:String x:Key="AppTitle">Nekomata</sys:String>
+    
+    <!-- Sidebar -->
+    <sys:String x:Key="Sidebar_Projects">Projects</sys:String>
+    <sys:String x:Key="Sidebar_OpenGame">Open Game.exe</sys:String>
+    <sys:String x:Key="Sidebar_ImportProject">Import Project</sys:String>
+    <sys:String x:Key="Sidebar_OpenProject">Open Project</sys:String>
+    <sys:String x:Key="Context_Export">Export Project</sys:String>
+    <sys:String x:Key="Context_Remove">Remove Project</sys:String>
+    <sys:String x:Key="Context_SaveAndClose">Save and Close</sys:String>
+    
+    <!-- Main Content Header -->
+    <sys:String x:Key="Header_SelectProject">Select or Drop a Game Project</sys:String>
+    <sys:String x:Key="Header_TranslateAll">Translate All</sys:String>
+    <sys:String x:Key="Header_SaveProject">Save Project</sys:String>
+    <sys:String x:Key="Header_ApplyTranslation">Apply Translation</sys:String>
+    <sys:String x:Key="Header_Settings">Settings</sys:String>
+    <sys:String x:Key="Header_Ready">Ready</sys:String>
+    
+    <!-- DataGrid Columns -->
+    <sys:String x:Key="Grid_Context">Context</sys:String>
+    <sys:String x:Key="Grid_Original">Original</sys:String>
+    <sys:String x:Key="Grid_Machine">Machine Translation</sys:String>
+    <sys:String x:Key="Grid_Human">Translate</sys:String>
+    
+    <!-- Settings Window -->
+    <sys:String x:Key="Settings_Title">Settings</sys:String>
+    <sys:String x:Key="Settings_Language">Language</sys:String>
+    <sys:String x:Key="Settings_Theme">Theme</sys:String>
+    <sys:String x:Key="Theme_Light">Light</sys:String>
+    <sys:String x:Key="Theme_Dark">Dark</sys:String>
+    <sys:String x:Key="Settings_Providers">Translation Providers</sys:String>
+    <sys:String x:Key="Settings_Baidu">Baidu Translate</sys:String>
+    <sys:String x:Key="Settings_Google">Google Translate</sys:String>
+    <sys:String x:Key="Settings_Bing">Bing Translate</sys:String>
+    <sys:String x:Key="Settings_DeepL">DeepL Translate</sys:String>
+    <sys:String x:Key="Settings_AppId">App ID</sys:String>
+    <sys:String x:Key="Settings_SecretKey">Secret Key</sys:String>
+    <sys:String x:Key="Settings_ApiKey">API Key</sys:String>
+    <sys:String x:Key="Settings_Region">Region</sys:String>
+    <sys:String x:Key="Settings_Save">Save</sys:String>
+    <sys:String x:Key="Settings_Cancel">Cancel</sys:String>
+
+    <!-- Messages -->
+    <sys:String x:Key="Msg_TranslationApplied">Translation applied successfully!</sys:String>
+    <sys:String x:Key="Msg_FilesExported">Files exported to:</sys:String>
+    <sys:String x:Key="Msg_CopyInstruction">Please copy these files to your game's data directory (e.g. www/data).</sys:String>
+    <sys:String x:Key="Msg_SelectProvider">Please select a translation provider.</sys:String>
+
+    <!-- Dialog Titles -->
+    <sys:String x:Key="Title_ExtractionRequired">Extraction Required</sys:String>
+    <sys:String x:Key="Title_SelectGameExecutable">Select Game Executable</sys:String>
+    <sys:String x:Key="Title_SaveProject">Save Project</sys:String>
+    <sys:String x:Key="Title_OpenProject">Open Project</sys:String>
+    <sys:String x:Key="Title_ExportProject">Export Project</sys:String>
+    <sys:String x:Key="Title_Error">Error</sys:String>
+    <sys:String x:Key="Title_Success">Success</sys:String>
+
+    <!-- Filter Descriptions -->
+    <sys:String x:Key="Filter_GameExecutable">Game Executable|Game.exe;*.exe</sys:String>
+    <sys:String x:Key="Filter_NekomataProject">Nekomata Project|*.nkproj</sys:String>
+    <sys:String x:Key="Filter_OpenProject">Nekomata Project|*.nkproj|JSON Files|*.json|All Files|*.*</sys:String>
+    <sys:String x:Key="Filter_ExportProject">JSON Files|*.json|All Files|*.*</sys:String>
+
+    <!-- Messages -->
+    <sys:String x:Key="Msg_ProjectSaved">Project saved successfully.</sys:String>
+    <sys:String x:Key="Msg_ProjectExported">Project exported successfully!</sys:String>
+    <sys:String x:Key="Msg_LoadingData">Loading data...</sys:String>
+    <sys:String x:Key="Msg_ExtractionRequired">Encrypted game archive detected.\n\nSince Nekomata only has a packaging function and will not integrate unpacking functions like GARbro for the time being, you will need to use relevant game unpacking tools to unpack.\n\nPlease extract Game.rgss3a or Game.rgss2a to the following folder:\n{0}\n\nThen try importing again.</sys:String>
+    
+    <!-- Error Formats (Use with String.Format) -->
+    <sys:String x:Key="Error_CreatingProject">Error creating project: {0}</sys:String>
+    <sys:String x:Key="Error_SavingProject">Error saving project: {0}</sys:String>
+    <sys:String x:Key="Error_SavingClosingProject">Error saving/closing project: {0}</sys:String>
+    <sys:String x:Key="Error_ApplyingTranslation">Error applying translation: {0}</sys:String>
+    <sys:String x:Key="Error_OpeningProject">Error opening project: {0}</sys:String>
+    <sys:String x:Key="Error_ExportingProject">Error exporting project: {0}</sys:String>
+</ResourceDictionary>
