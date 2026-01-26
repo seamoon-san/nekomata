@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +49,12 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private string _selectedGroupOption = "None";
+
+    [ObservableProperty]
+    private double _translationProgress;
+
+    [ObservableProperty]
+    private string _progressDescription = string.Empty;
 
     private System.Threading.CancellationTokenSource? _searchCts;
 
@@ -115,10 +122,24 @@ public partial class MainViewModel : ObservableObject
         // LoadProjectsCommand.Execute(null);
     }
 
+    partial void OnSelectedProjectChanging(TranslationProject? value)
+    {
+        if (SelectedProject != null)
+        {
+            foreach (var unit in SelectedProject.TranslationUnits)
+                unit.PropertyChanged -= OnUnitPropertyChanged;
+            SelectedProject.TranslationUnits.CollectionChanged -= OnUnitsCollectionChanged;
+        }
+    }
+
     async partial void OnSelectedProjectChanged(TranslationProject? value)
     {
         if (value != null)
         {
+            foreach (var unit in value.TranslationUnits)
+                unit.PropertyChanged += OnUnitPropertyChanged;
+            value.TranslationUnits.CollectionChanged += OnUnitsCollectionChanged;
+
             TranslationUnitsView = CollectionViewSource.GetDefaultView(value.TranslationUnits);
             TranslationUnitsView.Filter = FilterTranslationUnit;
             UpdateGrouping(SelectedGroupOption);
@@ -127,6 +148,8 @@ public partial class MainViewModel : ObservableObject
         {
             TranslationUnitsView = null;
         }
+
+        UpdateProgress();
 
         if (value != null && !_loadedProjectIds.Contains(value.Id))
         {
@@ -139,6 +162,45 @@ public partial class MainViewModel : ObservableObject
                 await LoadProjectDetails(value);
             }
         }
+    }
+
+    private void OnUnitsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.OldItems != null)
+        {
+            foreach (TranslationUnit item in e.OldItems)
+                item.PropertyChanged -= OnUnitPropertyChanged;
+        }
+        if (e.NewItems != null)
+        {
+            foreach (TranslationUnit item in e.NewItems)
+                item.PropertyChanged += OnUnitPropertyChanged;
+        }
+        UpdateProgress();
+    }
+
+    private void OnUnitPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(TranslationUnit.HumanTranslation))
+        {
+            UpdateProgress();
+        }
+    }
+
+    private void UpdateProgress()
+    {
+        if (SelectedProject == null || SelectedProject.TranslationUnits == null || SelectedProject.TranslationUnits.Count == 0)
+        {
+            TranslationProgress = 0;
+            ProgressDescription = "0% (0/0)";
+            return;
+        }
+
+        var total = SelectedProject.TranslationUnits.Count;
+        var translated = SelectedProject.TranslationUnits.Count(u => !string.IsNullOrEmpty(u.HumanTranslation));
+        
+        TranslationProgress = (double)translated / total * 100;
+        ProgressDescription = $"{TranslationProgress:F1}% ({translated}/{total})";
     }
 
     private async Task LoadProjectDetails(TranslationProject project)

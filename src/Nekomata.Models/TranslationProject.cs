@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Nekomata.Models;
 
@@ -12,5 +12,5 @@ public class TranslationProject
     public string EngineType { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public List<TranslationUnit> TranslationUnits { get; set; } = new();
+    public ObservableCollection<TranslationUnit> TranslationUnits { get; set; } = new();
 }

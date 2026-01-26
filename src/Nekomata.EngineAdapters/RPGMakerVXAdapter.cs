@@ -22,11 +22,9 @@ public class RPGMakerVXAdapter : IGameEngineAdapter
         
         if (Directory.Exists(gamePath))
         {
-             if (File.Exists(Path.Combine(gamePath, "Game.rgss3a")) || 
-                 File.Exists(Path.Combine(gamePath, "Game.rgss2a")))
-             {
-                 return true;
-             }
+             var hasArchive = Directory.EnumerateFiles(gamePath, "*.rgss3a").Any() ||
+                              Directory.EnumerateFiles(gamePath, "*.rgss2a").Any();
+             if (hasArchive) return true;
              
              var dataPath = Path.Combine(gamePath, "Data");
              if (Directory.Exists(dataPath))
@@ -70,8 +68,9 @@ public class RPGMakerVXAdapter : IGameEngineAdapter
                     Directory.CreateDirectory(nekomataDir);
                 }
                 
-                string archiveName = "Game.rgss3a";
-                if (File.Exists(Path.Combine(rootDir, "Game.rgss2a"))) archiveName = "Game.rgss2a";
+                string archiveName = Directory.GetFiles(rootDir, "*.rgss3a").Select(Path.GetFileName).FirstOrDefault()
+                                     ?? Directory.GetFiles(rootDir, "*.rgss2a").Select(Path.GetFileName).FirstOrDefault()
+                                     ?? "Game.rgss3a";
 
                 throw new GameExtractionRequiredException(
                     $"Detected {EngineName}.\nPlease extract the contents of '{archiveName}' into the folder:\n{nekomataDir}\n\nThen try importing again.",

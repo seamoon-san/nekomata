@@ -20,7 +20,15 @@ namespace Nekomata.Installer
 
             var project = new Project("Nekomata",
                 new Dir(@"%ProgramFiles%\SeaMoon Craft\Nekomata",
-                    new DirFiles(Path.Combine(publishDir, "*.*")),
+                    new DirFiles(Path.Combine(publishDir, "*.*"), f => !f.EndsWith("Nekomata.UI.exe", StringComparison.OrdinalIgnoreCase)),
+                    new WixSharp.File(Path.Combine(publishDir, "Nekomata.UI.exe"),
+                        new FileAssociation("nkproj")
+                        {
+                            ContentType = "application/nekomata-project",
+                            Description = "Nekomata Project",
+                            Icon = Path.Combine(projectDir, @"src\Nekomata.Installer\Assets\nkproj.ico")
+                        }
+                    ),
                     new ExeFileShortcut("Nekomata", "[INSTALLDIR]Nekomata.UI.exe", "")
                     {
                         WorkingDirectory = "[INSTALLDIR]"
@@ -37,7 +45,7 @@ namespace Nekomata.Installer
             );
 
             project.GUID = new Guid("6f330b47-2577-43ad-9095-1861ba25889b");
-            project.Version = new Version("0.1.0");
+            project.Version = new Version("0.1.1");
             project.ControlPanelInfo.Manufacturer = "SeaMoon Craft";
             project.OutDir = Path.Combine(projectDir, "dist");
             project.OutFileName = "Nekomata-Setup";

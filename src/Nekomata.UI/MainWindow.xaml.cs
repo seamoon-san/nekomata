@@ -8,6 +8,9 @@ using Controls = System.Windows.Controls;
 
 using Nekomata.Models;
 using System.Windows.Data;
+using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System;
 
 namespace Nekomata.UI;
 
@@ -187,18 +190,134 @@ public partial class MainWindow : FluentWindow
         }
     }
 
-    private void CopyOriginalText(TranslationUnit? unit)
+    #region Win32 Clipboard API
+    [DllImport("user32.dll")]
+    private static extern bool OpenClipboard(IntPtr hWndNewOwner);
+
+    [DllImport("user32.dll")]
+    private static extern bool CloseClipboard();
+
+    [DllImport("user32.dll")]
+    private static extern bool EmptyClipboard();
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr SetClipboardData(uint uFormat, IntPtr hMem);
+
+    [DllImport("kernel32.dll")]
+    private static extern IntPtr GlobalAlloc(uint uFlags, UIntPtr dwBytes);
+
+    [DllImport("kernel32.dll")]
+    private static extern IntPtr GlobalLock(IntPtr hMem);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool GlobalUnlock(IntPtr hMem);
+
+    [DllImport("kernel32.dll")]
+    private static extern IntPtr GlobalFree(IntPtr hMem);
+
+    private const uint CF_UNICODETEXT = 13;
+    private const uint GMEM_MOVEABLE = 0x0002;
+    private const uint GMEM_ZEROINIT = 0x0040;
+    private const uint GHND = GMEM_MOVEABLE | GMEM_ZEROINIT;
+    #endregion
+
+    private async void CopyOriginalText(TranslationUnit? unit)
     {
         if (unit == null || string.IsNullOrEmpty(unit.OriginalText)) return;
 
         try
         {
-            Clipboard.SetText(unit.OriginalText);
-            _snackbarService.Show("提示", "复制成功", ControlAppearance.Success, new SymbolIcon(SymbolRegular.Checkmark24), TimeSpan.FromSeconds(2));
+            var text = unit.OriginalText.Replace("\0", string.Empty);
+
+            const int MaxRetries = 10;
+            const int DelayMs = 100;
+
+            for (int i = 0; i < MaxRetries; i++)
+            {
+                try
+                {
+                    // Attempt to release any potential lock held by this thread
+                    // This is a "best effort" to fix the "CLIPBRD_E_CANT_OPEN" if it was caused by a previous leak
+                    try { CloseClipboard(); } catch { }
+
+                    await Task.Run(() =>
+                    {
+                        // Use native API for more control
+                        if (!OpenClipboard(IntPtr.Zero))
+                        {
+                            throw new Exception("OpenClipboard failed");
+                        }
+
+                        try
+                        {
+                            if (!EmptyClipboard())
+                            {
+                                throw new Exception("EmptyClipboard failed");
+                            }
+
+                            // Allocate global memory
+                            // +2 for double null terminator (Unicode)
+                            var bytes = (uint)(text.Length + 1) * 2;
+                            var hGlobal = GlobalAlloc(GHND, (UIntPtr)bytes);
+                            
+                            if (hGlobal == IntPtr.Zero)
+                            {
+                                throw new Exception("GlobalAlloc failed");
+                            }
+
+                            try
+                            {
+                                var target = GlobalLock(hGlobal);
+                                if (target == IntPtr.Zero)
+                                {
+                                    throw new Exception("GlobalLock failed");
+                                }
+
+                                try
+                                {
+                                    var data = System.Text.Encoding.Unicode.GetBytes(text);
+                                    Marshal.Copy(data, 0, target, data.Length);
+                                }
+                                finally
+                                {
+                                    GlobalUnlock(hGlobal);
+                                }
+
+                                if (SetClipboardData(CF_UNICODETEXT, hGlobal) == IntPtr.Zero)
+                                {
+                                    throw new Exception("SetClipboardData failed");
+                                }
+                                
+                                // System owns the memory now, do not free hGlobal
+                                hGlobal = IntPtr.Zero;
+                            }
+                            finally
+                            {
+                                if (hGlobal != IntPtr.Zero)
+                                {
+                                    GlobalFree(hGlobal);
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            CloseClipboard();
+                        }
+                    });
+
+                    _snackbarService.Show("提示", "复制成功", ControlAppearance.Success, new SymbolIcon(SymbolRegular.Checkmark24), TimeSpan.FromSeconds(2));
+                    return;
+                }
+                catch (Exception)
+                {
+                    if (i == MaxRetries - 1) throw;
+                    await Task.Delay(DelayMs);
+                }
+            }
         }
-        catch
+        catch (Exception ex)
         {
-            _snackbarService.Show("错误", "复制失败", ControlAppearance.Danger, new SymbolIcon(SymbolRegular.ErrorCircle24), TimeSpan.FromSeconds(2));
+            _snackbarService.Show("错误", $"复制失败: {ex.Message}", ControlAppearance.Danger, new SymbolIcon(SymbolRegular.ErrorCircle24), TimeSpan.FromSeconds(2));
         }
     }
 }
