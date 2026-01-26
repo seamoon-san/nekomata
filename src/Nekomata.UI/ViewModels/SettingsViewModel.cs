@@ -14,6 +14,8 @@ public partial class SettingsViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private readonly ILocalizationService _localizationService;
 
+    private bool _isInitializing;
+
     [ObservableProperty]
     private AppSettings _settings = new();
     
@@ -48,8 +50,18 @@ public partial class SettingsViewModel : ObservableObject
             if (SetProperty(ref _selectedTheme, value))
             {
                 Settings.Theme = value;
-                var theme = value == "Dark" ? ApplicationTheme.Dark : ApplicationTheme.Light;
-                ThemeTransitionHelper.ApplyThemeSmoothly(theme);
+                if (value == "Auto")
+                {
+                    ThemeDetector.Watch();
+                    var theme = ThemeDetector.GetSystemTheme();
+                    ThemeTransitionHelper.ApplyThemeSmoothly(theme);
+                }
+                else
+                {
+                    ThemeDetector.UnWatch();
+                    var theme = value == "Dark" ? ApplicationTheme.Dark : ApplicationTheme.Light;
+                    ThemeTransitionHelper.ApplyThemeSmoothly(theme);
+                }
             }
         }
     }
@@ -61,6 +73,7 @@ public partial class SettingsViewModel : ObservableObject
         
         AvailableThemes.Add(new(_localizationService.GetString("Theme_Light"), "Light"));
         AvailableThemes.Add(new(_localizationService.GetString("Theme_Dark"), "Dark"));
+        AvailableThemes.Add(new(_localizationService.GetString("Theme_Auto"), "Auto"));
         
         LoadSettingsCommand.Execute(null);
     }
@@ -68,39 +81,49 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task LoadSettings()
     {
-        Settings = await _settingsService.LoadSettingsAsync();
-        
-        // Initialize SelectedLanguage
-        // Priority 1: Current active culture (to prevent reverting unsaved changes when re-opening settings)
-        var currentCulture = _localizationService.CurrentCulture.Name;
-        var match = AvailableLanguages.Find(x => x.Value == currentCulture);
-        
-        if (!string.IsNullOrEmpty(match.Value))
+        _isInitializing = true;
+        try
         {
-            SelectedLanguage = match;
-        }
-        else
-        {
-            // Priority 2: Saved setting
-            SelectedLanguage = AvailableLanguages.Find(x => x.Value == Settings.InterfaceLanguage);
-        }
+            Settings = await _settingsService.LoadSettingsAsync();
+            
+            // Initialize SelectedLanguage
+            // Priority 1: Current active culture (to prevent reverting unsaved changes when re-opening settings)
+            var currentCulture = _localizationService.CurrentCulture.Name;
+            var match = AvailableLanguages.Find(x => x.Value == currentCulture);
+            
+            if (!string.IsNullOrEmpty(match.Value))
+            {
+                SelectedLanguage = match;
+            }
+            else
+            {
+                // Priority 2: Saved setting
+                SelectedLanguage = AvailableLanguages.Find(x => x.Value == Settings.InterfaceLanguage);
+            }
 
-        // Priority 3: Default to first available
-        if (string.IsNullOrEmpty(SelectedLanguage.Value))
-        {
-             SelectedLanguage = AvailableLanguages[0];
-        }
+            // Priority 3: Default to first available
+            if (string.IsNullOrEmpty(SelectedLanguage.Value))
+            {
+                 SelectedLanguage = AvailableLanguages[0];
+            }
 
-        SelectedTheme = Settings.Theme ?? "Light";
+            SelectedTheme = Settings.Theme ?? "Auto";
+        }
+        finally
+        {
+            _isInitializing = false;
+        }
     }
 
-    [RelayCommand]
-    private async Task SaveSettings(Window? window)
+    private async void SaveSettings()
     {
-        await _settingsService.SaveSettingsAsync(Settings);
-        if (window != null)
+        try
         {
-            window.Close();
+            await _settingsService.SaveSettingsAsync(Settings);
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to save settings: {ex.Message}");
         }
     }
 }

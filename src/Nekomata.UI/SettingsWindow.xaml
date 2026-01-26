@@ -18,7 +18,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <ui:TitleBar Title="{DynamicResource Settings_Title}" Icon="pack://application:,,,/Assets/icon.ico" Grid.Row="0"/>
@@ -43,10 +42,5 @@
                 </ui:CardControl>
             </StackPanel>
         </ScrollViewer>
-
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="20,0,20,20">
-            <ui:Button Content="{DynamicResource Settings_Save}" Command="{Binding SaveSettingsCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Appearance="Primary" Width="80" Margin="0,0,10,0"/>
-            <ui:Button Content="{DynamicResource Settings_Cancel}" IsCancel="True" Width="80"/>
-        </StackPanel>
     </Grid>
 </ui:FluentWindow>

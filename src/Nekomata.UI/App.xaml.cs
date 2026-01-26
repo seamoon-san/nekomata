@@ -13,6 +13,7 @@ using Nekomata.UI.ViewModels;
 using Serilog;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
+using Nekomata.UI.Helpers;
 
 namespace Nekomata.UI;
 
@@ -70,8 +71,25 @@ public partial class App : Application
         localizationService.SetLanguage(settings.InterfaceLanguage);
 
         // Apply Theme
-        var theme = settings.Theme == "Dark" ? ApplicationTheme.Dark : ApplicationTheme.Light;
-        ApplicationThemeManager.Apply(theme);
+        if (settings.Theme == "Auto")
+        {
+            ThemeDetector.Watch();
+            var theme = ThemeDetector.GetSystemTheme();
+            ApplicationThemeManager.Apply(theme);
+        }
+        else
+        {
+            var theme = settings.Theme == "Dark" ? ApplicationTheme.Dark : ApplicationTheme.Light;
+            ApplicationThemeManager.Apply(theme);
+        }
+
+        ThemeDetector.ThemeChanged += (s, theme) =>
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ThemeTransitionHelper.ApplyThemeSmoothly(theme);
+            });
+        };
 
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
