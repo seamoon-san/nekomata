@@ -2,6 +2,7 @@
 [Bb]in/
 [Oo]bj/
 dist/
+TestResults/
 
 # Visual Studio
 .vs/
@@ -9,6 +10,7 @@ dist/
 *.user
 *.suo
 *.userprefs
+*.launch
 
 # Database
 *.db
@@ -25,3 +27,12 @@ logs/
 # OS generated
 .DS_Store
 Thumbs.db
+
+# Installer / WixSharp
+*.wixobj
+*.wixpdb
+*.msi
+**/wix/
+
+# Local configuration
+appsettings.Development.json

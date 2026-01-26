@@ -36,6 +36,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+
+    <!-- Assembly Information -->
+    <Version>0.1.0</Version>
+    <FileVersion>0.1.0</FileVersion>
+    <AssemblyVersion>0.1.0</AssemblyVersion>
+    <Authors>Sanchess</Authors>
+    <Company>SeaMoon Craft</Company>
+    <Product>Nekomata</Product>
+    <Description>Translation tool for RPG Maker games.</Description>
+    <Copyright>Copyright (c) 2026 SeaMoon Craft</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
