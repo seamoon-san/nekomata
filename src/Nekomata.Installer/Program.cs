@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Xml.Linq;
 using WixSharp;
 
 namespace Nekomata.Installer
@@ -10,6 +11,7 @@ namespace Nekomata.Installer
         {
             var projectDir = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\"));
             var publishDir = Path.Combine(projectDir, @"dist\Nekomata-win-x64-unpacked");
+            var iconPath = Path.Combine(projectDir, @"src\Nekomata.Installer\Assets\nkproj.ico");
 
             if (!Directory.Exists(publishDir))
             {
@@ -26,7 +28,8 @@ namespace Nekomata.Installer
                         {
                             ContentType = "application/nekomata-project",
                             Description = "Nekomata Project",
-                            Icon = Path.Combine(projectDir, @"src\Nekomata.Installer\Assets\nkproj.ico")
+                            // We set the Icon attribute manually via Attributes to avoid invalid ID generation from path
+                            Attributes = { { "Icon", "NkProjIcon" } } 
                         }
                     ),
                     new ExeFileShortcut("Nekomata", "[INSTALLDIR]Nekomata.UI.exe", "")
@@ -51,6 +54,16 @@ namespace Nekomata.Installer
             project.OutFileName = "Nekomata-Setup";
             project.LicenceFile = Path.Combine(projectDir, @"src\Nekomata.Installer\Assets\License.rtf");
             project.UI = WUI.WixUI_InstallDir;
+
+            // Manually inject the Icon element to fix the ProgId/@Icon attribute error
+            project.WixSourceGenerated += (doc) =>
+            {
+                var ns = doc.Root.Name.Namespace;
+                var product = doc.Root.Element(ns + "Product");
+                product.Add(new XElement(ns + "Icon",
+                    new XAttribute("Id", "NkProjIcon"),
+                    new XAttribute("SourceFile", iconPath)));
+            };
 
             // Ensure the dist folder exists for the MSI output
             Directory.CreateDirectory(project.OutDir);
