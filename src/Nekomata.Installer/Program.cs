@@ -48,7 +48,7 @@ namespace Nekomata.Installer
             );
 
             project.GUID = new Guid("6f330b47-2577-43ad-9095-1861ba25889b");
-            project.Version = new Version("0.1.1");
+            project.Version = new Version("0.2.0");
             project.ControlPanelInfo.Manufacturer = "SeaMoon Craft";
             project.OutDir = Path.Combine(projectDir, "dist");
             project.OutFileName = "Nekomata-Setup";
