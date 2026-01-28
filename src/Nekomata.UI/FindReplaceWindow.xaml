@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         mc:Ignorable="d"
-        Title="查找和替换" Height="300" Width="400"
+        Title="{DynamicResource Title_FindReplace}" Height="300" Width="400"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         ExtendsContentIntoTitleBar="True"
@@ -32,16 +32,16 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="查找内容(原文/译文):" VerticalAlignment="Center" Margin="0,0,10,10"/>
+            <TextBlock Text="{DynamicResource Label_FindWhat}" VerticalAlignment="Center" Margin="0,0,10,10"/>
             <ui:TextBox x:Name="FindTextBox" Grid.Column="1" Margin="0,0,0,10"/>
 
-            <TextBlock Grid.Row="1" Text="替换为:" VerticalAlignment="Center" Margin="0,0,10,10"/>
+            <TextBlock Grid.Row="1" Text="{DynamicResource Label_ReplaceWith}" VerticalAlignment="Center" Margin="0,0,10,10"/>
             <ui:TextBox x:Name="ReplaceTextBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,10"/>
 
             <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                <ui:Button Content="查找下一个" Click="FindNext_Click" Margin="0,0,10,0"/>
-                <ui:Button Content="替换" Click="Replace_Click" Margin="0,0,10,0"/>
-                <ui:Button Content="全部替换" Click="ReplaceAll_Click" Appearance="Primary"/>
+                <ui:Button Content="{DynamicResource Btn_FindNext}" Click="FindNext_Click" Margin="0,0,10,0"/>
+                <ui:Button Content="{DynamicResource Btn_Replace}" Click="Replace_Click" Margin="0,0,10,0"/>
+                <ui:Button Content="{DynamicResource Btn_ReplaceAll}" Click="ReplaceAll_Click" Appearance="Primary"/>
             </StackPanel>
         </Grid>
     </Grid>

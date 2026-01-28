@@ -10,6 +10,8 @@ public class LocalizationService : ILocalizationService
 {
     public CultureInfo CurrentCulture { get; private set; } = new CultureInfo("en-US");
 
+    public event EventHandler? LanguageChanged;
+
     public void SetLanguage(string cultureCode)
     {
         if (string.IsNullOrEmpty(cultureCode)) return;
@@ -45,16 +47,20 @@ public class LocalizationService : ILocalizationService
         // We identify it by checking if it contains a known key, e.g., "AppTitle"
         var oldDict = Application.Current.Resources.MergedDictionaries.FirstOrDefault(d => d.Contains("AppTitle"));
         
+        // Add new dictionary first to avoid resource missing state and reduce UI updates
+        Application.Current.Resources.MergedDictionaries.Add(dictionary);
+
         if (oldDict != null)
         {
             Application.Current.Resources.MergedDictionaries.Remove(oldDict);
         }
         
-        Application.Current.Resources.MergedDictionaries.Add(dictionary);
-        
         // Update thread culture
         System.Threading.Thread.CurrentThread.CurrentCulture = culture;
         System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
+
+        // Notify listeners
+        LanguageChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public string GetString(string key)
