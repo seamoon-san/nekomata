@@ -35,7 +35,7 @@ nekomata is a translation tool designed for RPG Maker games, **supporting RPG Ma
 
 - **Ctrl + S**: Save the current project.
 - **Ctrl + C**: Copy the text from the selected cell (or "Original Text" if the row is selected).
-- **Ctrl + Shift + X**：Apply this translation to other instances of the same source text (overwriting existing translations). * (For example, this function can be used to quickly translate a large number of "Yes" and "No" choice.)*
+- **Ctrl + Shift + X**：Apply this translation to other instances of the same source text (overwriting existing translations). *(For example, this function can be used to quickly translate a large number of "Yes" and "No" choice.)*
 - **Shift + Enter**: Navigate to the next row while editing.
 - **Enter**: Insert a new line (in editing mode).
 
