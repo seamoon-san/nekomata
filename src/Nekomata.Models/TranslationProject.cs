@@ -12,5 +12,11 @@ public class TranslationProject
     public string EngineType { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    // UI State Preservation
+    public string? LastFilter { get; set; }
+    public string? LastGroup { get; set; }
+    public double? LastScrollOffset { get; set; }
+
     public ObservableCollection<TranslationUnit> TranslationUnits { get; set; } = new();
 }

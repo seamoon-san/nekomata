@@ -8,6 +8,8 @@ namespace Nekomata.UI.Services;
 
 public class LocalizationService : ILocalizationService
 {
+    public event EventHandler? LanguageChanged;
+
     public CultureInfo CurrentCulture { get; private set; } = new CultureInfo("en-US");
 
     public void SetLanguage(string cultureCode)
@@ -55,6 +57,8 @@ public class LocalizationService : ILocalizationService
         // Update thread culture
         System.Threading.Thread.CurrentThread.CurrentCulture = culture;
         System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
+
+        LanguageChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public string GetString(string key)

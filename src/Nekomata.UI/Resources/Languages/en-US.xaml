@@ -79,4 +79,29 @@
     <sys:String x:Key="Error_ApplyingTranslation">Error applying translation: {0}</sys:String>
     <sys:String x:Key="Error_OpeningProject">Error opening project: {0}</sys:String>
     <sys:String x:Key="Error_ExportingProject">Error exporting project: {0}</sys:String>
+
+    <!-- MainWindow -->
+    <sys:String x:Key="Main_SearchLabel">Search:</sys:String>
+    <sys:String x:Key="Main_SearchPlaceholder">Search...</sys:String>
+    <sys:String x:Key="Main_FilterLabel">Filter:</sys:String>
+    <sys:String x:Key="Main_GroupLabel">Group:</sys:String>
+    <sys:String x:Key="Main_FindReplace">Find and Replace</sys:String>
+    <sys:String x:Key="Main_GroupItemCount">items</sys:String>
+
+    <!-- FindReplaceWindow -->
+    <sys:String x:Key="FindReplace_Title">Find and Replace</sys:String>
+    <sys:String x:Key="FindReplace_FindLabel">Find what (Original/Translation):</sys:String>
+    <sys:String x:Key="FindReplace_ReplaceLabel">Replace with:</sys:String>
+    <sys:String x:Key="FindReplace_FindNext">Find Next</sys:String>
+    <sys:String x:Key="FindReplace_Replace">Replace</sys:String>
+    <sys:String x:Key="FindReplace_ReplaceAll">Replace All</sys:String>
+
+    <!-- Messages -->
+    <sys:String x:Key="Msg_NotFound">Not found.</sys:String>
+    <sys:String x:Key="Msg_NoOccurrences">No occurrences found.</sys:String>
+    <sys:String x:Key="Msg_ReplacedCount">Replaced {0} occurrences.</sys:String>
+    <sys:String x:Key="Msg_NoOtherUnits">No other units with same original text found.</sys:String>
+    <sys:String x:Key="Msg_BatchOverwriteConfirm">Some units already have translations. Overwrite?</sys:String>
+    <sys:String x:Key="Title_ConfirmOverwrite">Confirm Overwrite</sys:String>
+    <sys:String x:Key="Msg_BatchApplied">Applied to {0} units.</sys:String>
 </ResourceDictionary>

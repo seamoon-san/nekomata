@@ -79,4 +79,29 @@
     <sys:String x:Key="Error_ApplyingTranslation">应用译文出错：{0}</sys:String>
     <sys:String x:Key="Error_OpeningProject">打开工程出错：{0}</sys:String>
     <sys:String x:Key="Error_ExportingProject">导出工程出错：{0}</sys:String>
+
+    <!-- MainWindow -->
+    <sys:String x:Key="Main_SearchLabel">搜索:</sys:String>
+    <sys:String x:Key="Main_SearchPlaceholder">搜索...</sys:String>
+    <sys:String x:Key="Main_FilterLabel">筛选:</sys:String>
+    <sys:String x:Key="Main_GroupLabel">分组:</sys:String>
+    <sys:String x:Key="Main_FindReplace">查找和替换</sys:String>
+    <sys:String x:Key="Main_GroupItemCount">项</sys:String>
+
+    <!-- FindReplaceWindow -->
+    <sys:String x:Key="FindReplace_Title">查找和替换</sys:String>
+    <sys:String x:Key="FindReplace_FindLabel">查找内容(原文/译文):</sys:String>
+    <sys:String x:Key="FindReplace_ReplaceLabel">替换为:</sys:String>
+    <sys:String x:Key="FindReplace_FindNext">查找下一个</sys:String>
+    <sys:String x:Key="FindReplace_Replace">替换</sys:String>
+    <sys:String x:Key="FindReplace_ReplaceAll">全部替换</sys:String>
+
+    <!-- Messages -->
+    <sys:String x:Key="Msg_NotFound">未找到。</sys:String>
+    <sys:String x:Key="Msg_NoOccurrences">未找到匹配项。</sys:String>
+    <sys:String x:Key="Msg_ReplacedCount">已替换 {0} 处。</sys:String>
+    <sys:String x:Key="Msg_NoOtherUnits">未找到其他原文相同的条目。</sys:String>
+    <sys:String x:Key="Msg_BatchOverwriteConfirm">部分条目已有译文，是否覆盖？</sys:String>
+    <sys:String x:Key="Title_ConfirmOverwrite">确认覆盖</sys:String>
+    <sys:String x:Key="Msg_BatchApplied">已应用到 {0} 个条目。</sys:String>
 </ResourceDictionary>

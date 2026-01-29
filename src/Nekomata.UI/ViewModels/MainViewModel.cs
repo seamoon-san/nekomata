@@ -56,52 +56,115 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _progressDescription = string.Empty;
 
-    private System.Threading.CancellationTokenSource? _searchCts;
+    [ObservableProperty]
+    private double _scrollOffset;
 
-    public List<string> FilterContexts { get; } = new() { "All", "Choice", "ShowText", "Name", "CommonEvent" };
+    public event Action<double>? RequestScrollToOffset;
+
+    private System.Threading.CancellationTokenSource? _updateViewCts;
+
+    public List<string> FilterContexts { get; } = new() { "All", "Choice", "Show Text", "Name", "CommonEvent" };
     public List<string> GroupOptions { get; } = new() { "None", "Context", "OriginalText", "HumanTranslation" };
 
-    async partial void OnSearchTextChanged(string value)
-    {
-        _searchCts?.Cancel();
-        _searchCts = new System.Threading.CancellationTokenSource();
-        var token = _searchCts.Token;
+    partial void OnSearchTextChanged(string value) => TriggerUpdateView();
 
-        try
+    partial void OnSelectedFilterContextChanged(string value) => TriggerUpdateView();
+    partial void OnSelectedGroupOptionChanged(string value) => TriggerUpdateView(0); // Immediate grouping update
+
+    private void TriggerUpdateView(int delayMs = 300, bool restoreScroll = false)
+    {
+        _updateViewCts?.Cancel();
+        _updateViewCts = new System.Threading.CancellationTokenSource();
+        var token = _updateViewCts.Token;
+
+        Task.Run(async () =>
         {
-            await Task.Delay(300, token); // Debounce 300ms
+            try
+            {
+                if (delayMs > 0) await Task.Delay(delayMs, token);
+                if (token.IsCancellationRequested) return;
+
+                await UpdateViewAsync(token, restoreScroll);
+            }
+            catch (TaskCanceledException) { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in TriggerUpdateView: {ex}");
+            }
+        });
+    }
+
+    private async Task UpdateViewAsync(System.Threading.CancellationToken token, bool restoreScroll)
+    {
+        if (SelectedProject == null)
+        {
+            await Application.Current.Dispatcher.InvokeAsync(() => TranslationUnitsView = null);
+            return;
+        }
+
+        // Capture current state
+        var project = SelectedProject;
+        var searchText = SearchText;
+        var filterContext = SelectedFilterContext;
+        var groupOption = SelectedGroupOption;
+
+        // Perform filtering on background thread
+        var filteredList = await Task.Run(() =>
+        {
+            if (token.IsCancellationRequested) return null;
+
+            IEnumerable<TranslationUnit> query = project.TranslationUnits;
+
+            if (filterContext != "All")
+            {
+                query = query.Where(u => !string.IsNullOrEmpty(u.Context) && u.Context.Contains(filterContext, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                query = query.Where(u =>
+                    (u.OriginalText?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (u.HumanTranslation?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (u.Context?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
+                );
+            }
+
+            return query.ToList();
+        }, token);
+
+        if (token.IsCancellationRequested || filteredList == null) return;
+
+        // Update UI
+        await Application.Current.Dispatcher.InvokeAsync(() =>
+        {
             if (token.IsCancellationRequested) return;
 
-            // Run filter on UI thread (CollectionView requires it)
-            Application.Current.Dispatcher.Invoke(() =>
+            var currentSelection = SelectedUnit;
+            var newView = new ListCollectionView(filteredList);
+
+            if (groupOption != "None")
             {
-                TranslationUnitsView?.Refresh();
-            });
-        }
-        catch (TaskCanceledException) { }
-    } 
-
-    partial void OnSelectedFilterContextChanged(string value) => TranslationUnitsView?.Refresh();
-    partial void OnSelectedGroupOptionChanged(string value) => UpdateGrouping(value);
-
-    private void UpdateGrouping(string option)
-    {
-        if (TranslationUnitsView == null) return;
-
-        using (TranslationUnitsView.DeferRefresh())
-        {
-            TranslationUnitsView.GroupDescriptions.Clear();
-            if (option != "None")
-            {
-                string propertyName = option switch
+                string propertyName = groupOption switch
                 {
                     "OriginalText" => nameof(TranslationUnit.OriginalText),
                     "HumanTranslation" => nameof(TranslationUnit.HumanTranslation),
                     _ => nameof(TranslationUnit.Context)
                 };
-                TranslationUnitsView.GroupDescriptions.Add(new PropertyGroupDescription(propertyName));
+                newView.GroupDescriptions.Add(new PropertyGroupDescription(propertyName));
             }
-        }
+
+            TranslationUnitsView = newView;
+
+            if (currentSelection != null && filteredList.Contains(currentSelection))
+            {
+                SelectedUnit = currentSelection;
+            }
+
+            if (restoreScroll)
+            {
+                RequestScrollToOffset?.Invoke(ScrollOffset);
+            }
+        });
     }
 
 
@@ -140,9 +203,13 @@ public partial class MainViewModel : ObservableObject
                 unit.PropertyChanged += OnUnitPropertyChanged;
             value.TranslationUnits.CollectionChanged += OnUnitsCollectionChanged;
 
-            TranslationUnitsView = CollectionViewSource.GetDefaultView(value.TranslationUnits);
-            TranslationUnitsView.Filter = FilterTranslationUnit;
-            UpdateGrouping(SelectedGroupOption);
+            // Restore UI State
+            SelectedFilterContext = value.LastFilter ?? "All";
+            SelectedGroupOption = value.LastGroup ?? "None";
+            ScrollOffset = value.LastScrollOffset ?? 0;
+
+            // Trigger view update and request scroll restoration
+            TriggerUpdateView(0, restoreScroll: value.LastScrollOffset.HasValue);
         }
         else
         {
@@ -189,18 +256,21 @@ public partial class MainViewModel : ObservableObject
 
     private void UpdateProgress()
     {
-        if (SelectedProject == null || SelectedProject.TranslationUnits == null || SelectedProject.TranslationUnits.Count == 0)
+        Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            TranslationProgress = 0;
-            ProgressDescription = "0% (0/0)";
-            return;
-        }
+            if (SelectedProject == null || SelectedProject.TranslationUnits == null || SelectedProject.TranslationUnits.Count == 0)
+            {
+                TranslationProgress = 0;
+                ProgressDescription = "0% (0/0)";
+                return;
+            }
 
-        var total = SelectedProject.TranslationUnits.Count;
-        var translated = SelectedProject.TranslationUnits.Count(u => !string.IsNullOrEmpty(u.HumanTranslation));
-        
-        TranslationProgress = (double)translated / total * 100;
-        ProgressDescription = $"{TranslationProgress:F1}% ({translated}/{total})";
+            var total = SelectedProject.TranslationUnits.Count;
+            var translated = SelectedProject.TranslationUnits.Count(u => !string.IsNullOrEmpty(u.HumanTranslation));
+
+            TranslationProgress = (double)translated / total * 100;
+            ProgressDescription = $"{TranslationProgress:F1}% ({translated}/{total})";
+        });
     }
 
     private async Task LoadProjectDetails(TranslationProject project)
@@ -317,6 +387,11 @@ public partial class MainViewModel : ObservableObject
              // Update timestamp
              SelectedProject.UpdatedAt = DateTime.Now;
 
+             // Save UI State
+             SelectedProject.LastFilter = SelectedFilterContext;
+             SelectedProject.LastGroup = SelectedGroupOption;
+             SelectedProject.LastScrollOffset = ScrollOffset;
+
              var json = JsonConvert.SerializeObject(SelectedProject, Formatting.Indented, new JsonSerializerSettings
              {
                  ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -381,6 +456,15 @@ public partial class MainViewModel : ObservableObject
             }
 
             project.UpdatedAt = DateTime.Now;
+
+            // Save UI State (if it's the currently selected project, we have the latest state in VM properties)
+            if (project == SelectedProject)
+            {
+                project.LastFilter = SelectedFilterContext;
+                project.LastGroup = SelectedGroupOption;
+                project.LastScrollOffset = ScrollOffset;
+            }
+
             var json = JsonConvert.SerializeObject(project, Formatting.Indented, new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -539,27 +623,6 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private bool FilterTranslationUnit(object obj)
-    {
-        if (obj is not TranslationUnit unit) return false;
-
-        if (SelectedFilterContext != "All")
-        {
-            if (string.IsNullOrEmpty(unit.Context) || !unit.Context.Contains(SelectedFilterContext, StringComparison.OrdinalIgnoreCase))
-                return false;
-        }
-
-        if (!string.IsNullOrWhiteSpace(SearchText))
-        {
-            bool match = (unit.OriginalText?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false)
-                      || (unit.HumanTranslation?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false)
-                      || (unit.Context?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false);
-            if (!match) return false;
-        }
-
-        return true;
-    }
-
     [RelayCommand]
     private async Task BatchApplyTranslation()
     {
@@ -711,7 +774,7 @@ public partial class MainViewModel : ObservableObject
 
              if (itemsToUpdate.Count == 0) 
              {
-                 System.Windows.MessageBox.Show("No occurrences found.");
+                 System.Windows.MessageBox.Show(_localizationService.GetString("Msg_NoOccurrences"));
                  return;
              }
 
@@ -733,7 +796,7 @@ public partial class MainViewModel : ObservableObject
                  }
              });
              
-             System.Windows.MessageBox.Show(string.Format("Replaced {0} occurrences.", count));
+             System.Windows.MessageBox.Show(string.Format(_localizationService.GetString("Msg_ReplacedCount"), count));
          }
          finally
          {

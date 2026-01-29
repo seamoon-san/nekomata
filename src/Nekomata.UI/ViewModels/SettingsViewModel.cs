@@ -34,12 +34,16 @@ public partial class SettingsViewModel : ObservableObject
             if (SetProperty(ref _selectedLanguage, value))
             {
                 Settings.InterfaceLanguage = value.Value;
-                _localizationService.SetLanguage(value.Value);
+                if (!_isInitializing)
+                {
+                    _localizationService.SetLanguage(value.Value);
+                    SaveSettings();
+                }
             }
         }
     }
 
-    public System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, string>> AvailableThemes { get; } = new();
+    public System.Collections.ObjectModel.ObservableCollection<System.Collections.Generic.KeyValuePair<string, string>> AvailableThemes { get; } = new();
 
     private string _selectedTheme = "Light";
     public string SelectedTheme
@@ -47,20 +51,27 @@ public partial class SettingsViewModel : ObservableObject
         get => _selectedTheme;
         set
         {
+            // Ignore null values to prevent theme reset when AvailableThemes list is cleared during language update
+            if (value is null) return;
+
             if (SetProperty(ref _selectedTheme, value))
             {
                 Settings.Theme = value;
-                if (value == "Auto")
+                if (!_isInitializing)
                 {
-                    ThemeDetector.Watch();
-                    var theme = ThemeDetector.GetSystemTheme();
-                    ThemeTransitionHelper.ApplyThemeSmoothly(theme);
-                }
-                else
-                {
-                    ThemeDetector.UnWatch();
-                    var theme = value == "Dark" ? ApplicationTheme.Dark : ApplicationTheme.Light;
-                    ThemeTransitionHelper.ApplyThemeSmoothly(theme);
+                    if (value == "Auto")
+                    {
+                        ThemeDetector.Watch();
+                        var theme = ThemeDetector.GetSystemTheme();
+                        ThemeTransitionHelper.ApplyThemeSmoothly(theme);
+                    }
+                    else
+                    {
+                        ThemeDetector.UnWatch();
+                        var theme = value == "Dark" ? ApplicationTheme.Dark : ApplicationTheme.Light;
+                        ThemeTransitionHelper.ApplyThemeSmoothly(theme);
+                    }
+                    SaveSettings();
                 }
             }
         }
@@ -71,11 +82,18 @@ public partial class SettingsViewModel : ObservableObject
         _settingsService = settingsService;
         _localizationService = localizationService;
         
+        UpdateThemeNames();
+        _localizationService.LanguageChanged += (_, _) => UpdateThemeNames();
+        
+        LoadSettingsCommand.Execute(null);
+    }
+
+    private void UpdateThemeNames()
+    {
+        AvailableThemes.Clear();
         AvailableThemes.Add(new(_localizationService.GetString("Theme_Light"), "Light"));
         AvailableThemes.Add(new(_localizationService.GetString("Theme_Dark"), "Dark"));
         AvailableThemes.Add(new(_localizationService.GetString("Theme_Auto"), "Auto"));
-        
-        LoadSettingsCommand.Execute(null);
     }
 
     [RelayCommand]

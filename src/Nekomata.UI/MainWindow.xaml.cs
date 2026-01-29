@@ -30,6 +30,48 @@ public partial class MainWindow : FluentWindow
         
         _snackbarService = snackbarService;
         snackbarService.SetSnackbarPresenter(this.SnackbarPresenter);
+        Loaded += MainWindow_Loaded;
+    }
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        SetupScrollSync();
+    }
+
+    private void SetupScrollSync()
+    {
+        var scrollViewer = FindVisualChild<Controls.ScrollViewer>(TranslationGrid);
+        if (scrollViewer != null)
+        {
+            scrollViewer.ScrollChanged += (s, e) =>
+            {
+                if (Math.Abs(ViewModel.ScrollOffset - e.VerticalOffset) > 0.1)
+                {
+                    ViewModel.ScrollOffset = e.VerticalOffset;
+                }
+            };
+
+            ViewModel.RequestScrollToOffset += (offset) =>
+            {
+                Dispatcher.InvokeAsync(() =>
+                {
+                    scrollViewer.ScrollToVerticalOffset(offset);
+                }, System.Windows.Threading.DispatcherPriority.Loaded);
+            };
+        }
+    }
+
+    private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+    {
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T typedChild) return typedChild;
+
+            var result = FindVisualChild<T>(child);
+            if (result != null) return result;
+        }
+        return null;
     }
 
     private void Window_Drop(object sender, DragEventArgs e)
