@@ -8,5 +8,4 @@ public interface ILocalizationService
     CultureInfo CurrentCulture { get; }
     void SetLanguage(string cultureCode);
     string GetString(string key);
-    event EventHandler LanguageChanged;
 }

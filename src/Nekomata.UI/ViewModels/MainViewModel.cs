@@ -56,71 +56,41 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _progressDescription = string.Empty;
 
-    [ObservableProperty]
-    private double _currentScrollOffset;
-
     private System.Threading.CancellationTokenSource? _searchCts;
 
-    public ObservableCollection<string> FilterContexts { get; } = new() { "All", "Choice", "Show Text", "Name", "CommonEvent" };
-    public ObservableCollection<string> GroupOptions { get; } = new() { "None", "Context", "OriginalText", "HumanTranslation" };
+    public List<string> FilterContexts { get; } = new() { "All", "Choice", "ShowText", "Name", "CommonEvent" };
+    public List<string> GroupOptions { get; } = new() { "None", "Context", "OriginalText", "HumanTranslation" };
 
     async partial void OnSearchTextChanged(string value)
     {
-        await ApplyFilterAsync();
+        _searchCts?.Cancel();
+        _searchCts = new System.Threading.CancellationTokenSource();
+        var token = _searchCts.Token;
+
+        try
+        {
+            await Task.Delay(300, token); // Debounce 300ms
+            if (token.IsCancellationRequested) return;
+
+            // Run filter on UI thread (CollectionView requires it)
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                TranslationUnitsView?.Refresh();
+            });
+        }
+        catch (TaskCanceledException) { }
     } 
 
-    async partial void OnSelectedFilterContextChanged(string value) => await ApplyFilterAsync();
-    async partial void OnSelectedGroupOptionChanged(string value) => await ChangeGroupOptionAsync(value);
+    partial void OnSelectedFilterContextChanged(string value) => TranslationUnitsView?.Refresh();
+    partial void OnSelectedGroupOptionChanged(string value) => UpdateGrouping(value);
 
-    private async Task ChangeGroupOptionAsync(string option)
+    private void UpdateGrouping(string option)
     {
-        IsBusy = true;
-        try 
+        if (TranslationUnitsView == null) return;
+
+        using (TranslationUnitsView.DeferRefresh())
         {
-            // 1. Clear View to force UI to release resources/layout
-            await Application.Current.Dispatcher.InvokeAsync(() => 
-            {
-                TranslationUnitsView = null;
-            });
-
-            // 2. Allow UI thread to breathe and finish clearing
-            await Task.Delay(100);
-
-            // 3. Rebuild view and apply grouping
-            // Note: We need the current filtered list. 
-            // Since we don't store the filtered list separately, we might need to re-run filter or access source.
-            // But usually ApplyFilterAsync handles View creation.
-            // Let's reuse ApplyFilterAsync logic but force the grouping option.
-            
-            // Wait, simply calling ApplyFilterAsync() will read SelectedGroupOption and rebuild the view.
-            // So we just need to ensure ApplyFilterAsync is called.
-            // Since SelectedGroupOption is bound, it's already updated.
-            
-            // However, to ensure the "Clear View" step happens, we can call ApplyFilterAsync
-            // but we want to make sure we don't duplicate work.
-            
-            await ApplyFilterAsync();
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    private void UpdateGroupingForView(ICollectionView? view, string option)
-    {
-        if (view == null) return;
-
-        // Ensure we are on UI thread for View operations
-        if (!Application.Current.Dispatcher.CheckAccess())
-        {
-            Application.Current.Dispatcher.Invoke(() => UpdateGroupingForView(view, option));
-            return;
-        }
-
-        using (view.DeferRefresh())
-        {
-            view.GroupDescriptions.Clear();
+            TranslationUnitsView.GroupDescriptions.Clear();
             if (option != "None")
             {
                 string propertyName = option switch
@@ -129,70 +99,8 @@ public partial class MainViewModel : ObservableObject
                     "HumanTranslation" => nameof(TranslationUnit.HumanTranslation),
                     _ => nameof(TranslationUnit.Context)
                 };
-                view.GroupDescriptions.Add(new PropertyGroupDescription(propertyName));
+                TranslationUnitsView.GroupDescriptions.Add(new PropertyGroupDescription(propertyName));
             }
-        }
-    }
-
-    private async Task ApplyFilterAsync()
-    {
-        _searchCts?.Cancel();
-        _searchCts = new System.Threading.CancellationTokenSource();
-        var token = _searchCts.Token;
-
-        var project = SelectedProject;
-        if (project == null)
-        {
-            Application.Current.Dispatcher.Invoke(() => TranslationUnitsView = null);
-            return;
-        }
-
-        var searchText = SearchText;
-        var filterContext = SelectedFilterContext;
-
-        try
-        {
-            // Debounce
-            await Task.Delay(300, token);
-            if (token.IsCancellationRequested) return;
-
-            IsBusy = true;
-
-            var filteredList = await Task.Run(() =>
-            {
-                var units = project.TranslationUnits;
-                IEnumerable<TranslationUnit> query = units;
-
-                if (filterContext != "All")
-                {
-                    query = query.Where(u => !string.IsNullOrEmpty(u.Context) && u.Context.Contains(filterContext, StringComparison.OrdinalIgnoreCase));
-                }
-
-                if (!string.IsNullOrWhiteSpace(searchText))
-                {
-                    query = query.Where(u =>
-                        (u.OriginalText != null && u.OriginalText.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
-                        (u.HumanTranslation != null && u.HumanTranslation.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
-                        (u.Context != null && u.Context.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-                    );
-                }
-
-                return query.ToList();
-            }, token);
-
-            if (token.IsCancellationRequested) return;
-
-            await Application.Current.Dispatcher.InvokeAsync(() =>
-            {
-                var newView = new ListCollectionView(filteredList);
-                UpdateGroupingForView(newView, SelectedGroupOption);
-                TranslationUnitsView = newView;
-            });
-        }
-        catch (TaskCanceledException) { }
-        finally
-        {
-            if (!token.IsCancellationRequested) IsBusy = false;
         }
     }
 
@@ -209,25 +117,9 @@ public partial class MainViewModel : ObservableObject
         _serviceProvider = serviceProvider;
         _localizationService = localizationService;
         _snackbarService = snackbarService;
-
-        _localizationService.LanguageChanged += OnLanguageChanged;
         
         // No longer loading history from DB
         // LoadProjectsCommand.Execute(null);
-    }
-
-    private void OnLanguageChanged(object? sender, EventArgs e)
-    {
-        // Refresh lists to trigger converter re-run
-        RefreshCollection(FilterContexts);
-        RefreshCollection(GroupOptions);
-    }
-
-    private void RefreshCollection(ObservableCollection<string> collection)
-    {
-        var items = collection.ToList();
-        collection.Clear();
-        foreach (var item in items) collection.Add(item);
     }
 
     partial void OnSelectedProjectChanging(TranslationProject? value)
@@ -248,63 +140,13 @@ public partial class MainViewModel : ObservableObject
                 unit.PropertyChanged += OnUnitPropertyChanged;
             value.TranslationUnits.CollectionChanged += OnUnitsCollectionChanged;
 
-            // Restore UI State
-            // Note: Setting these properties might trigger filtering/grouping.
-            // We should probably set them before calling ApplyFilterAsync if possible,
-            // or let ApplyFilterAsync use them.
-            
-            // Suspend automatic filtering/grouping triggers if possible, or just set them.
-            // The PropertyChanged handlers call Refresh/UpdateGrouping. 
-            // We can temporarily ignore them or just let them run (might be redundant but safe).
-            
-            // 1. Search Text & Filter Context
-            if (!string.IsNullOrEmpty(value.LastSearchText)) 
-                SearchText = value.LastSearchText;
-            else 
-                SearchText = string.Empty;
-                
-            if (!string.IsNullOrEmpty(value.LastFilterContext))
-            {
-                if (value.LastFilterContext == "ShowText")
-                    SelectedFilterContext = "Show Text";
-                else
-                    SelectedFilterContext = value.LastFilterContext;
-            }
-            else
-                SelectedFilterContext = "All";
-                
-            // 2. Grouping
-            if (!string.IsNullOrEmpty(value.LastGroupOption))
-                SelectedGroupOption = value.LastGroupOption;
-            else
-                SelectedGroupOption = "None";
-
-            // 3. Collapsed Groups
-            CollapsedGroupNames.Clear();
-            if (value.CollapsedGroups != null)
-            {
-                foreach (var name in value.CollapsedGroups)
-                    CollapsedGroupNames.Add(name);
-            }
-
-            await ApplyFilterAsync();
-            
-            // 4. Restore Selection (after filter applied)
-            if (value.LastSelectedUnitId.HasValue)
-            {
-                var unitToSelect = value.TranslationUnits.FirstOrDefault(u => u.Id == value.LastSelectedUnitId.Value);
-                if (unitToSelect != null)
-                {
-                    SelectedUnit = unitToSelect;
-                }
-            }
-
-            CurrentScrollOffset = value.LastScrollOffset;
+            TranslationUnitsView = CollectionViewSource.GetDefaultView(value.TranslationUnits);
+            TranslationUnitsView.Filter = FilterTranslationUnit;
+            UpdateGrouping(SelectedGroupOption);
         }
         else
         {
             TranslationUnitsView = null;
-            CollapsedGroupNames.Clear();
         }
 
         UpdateProgress();
@@ -446,21 +288,10 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    // Use HashSet for unique names, but convert to List for persistence
-    public HashSet<string> CollapsedGroupNames { get; } = new();
-
     [RelayCommand]
     private async Task SaveProject()
     {
         if (SelectedProject == null) return;
-
-        // Persist UI State
-        SelectedProject.LastFilterContext = SelectedFilterContext;
-        SelectedProject.LastGroupOption = SelectedGroupOption;
-        SelectedProject.LastSearchText = SearchText;
-        SelectedProject.LastSelectedUnitId = SelectedUnit?.Id;
-        SelectedProject.LastScrollOffset = CurrentScrollOffset;
-        SelectedProject.CollapsedGroups = CollapsedGroupNames.ToList();
 
         if (string.IsNullOrEmpty(SelectedProject.FilePath))
         {
@@ -526,17 +357,6 @@ public partial class MainViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            // If it's the currently selected project, update its state from UI first
-            if (project == SelectedProject)
-            {
-                project.LastFilterContext = SelectedFilterContext;
-                project.LastGroupOption = SelectedGroupOption;
-                project.LastSearchText = SearchText;
-                project.LastSelectedUnitId = SelectedUnit?.Id;
-                project.LastScrollOffset = CurrentScrollOffset;
-                project.CollapsedGroups = CollapsedGroupNames.ToList();
-            }
-
             if (string.IsNullOrEmpty(project.FilePath))
             {
                  // If no path, we must ask.
@@ -639,44 +459,40 @@ public partial class MainViewModel : ObservableObject
 
         if (openFileDialog.ShowDialog() == true)
         {
-            await OpenProjectFromFileAsync(openFileDialog.FileName);
-        }
-    }
-
-    public async Task OpenProjectFromFileAsync(string filePath)
-    {
-        IsBusy = true;
-        try
-        {
-            var json = await System.IO.File.ReadAllTextAsync(filePath);
-            var project = await Task.Run(() => JsonConvert.DeserializeObject<TranslationProject>(json));
-            
-            if (project != null)
+            IsBusy = true;
+            try
             {
-                // Set FilePath to where we opened it from
-                project.FilePath = filePath;
+                var json = await System.IO.File.ReadAllTextAsync(openFileDialog.FileName);
+                var project = await Task.Run(() => JsonConvert.DeserializeObject<TranslationProject>(json));
                 
-                // Check if already open
-                var existing = Projects.FirstOrDefault(p => p.Id == project.Id);
-                if (existing != null)
+                if (project != null)
                 {
-                    SelectedProject = existing;
-                }
-                else
-                {
-                    Projects.Add(project);
-                    SelectedProject = project;
-                    _loadedProjectIds.Add(project.Id);
+                    // Set FilePath to where we opened it from
+                    project.FilePath = openFileDialog.FileName;
+                    
+                    // Check if already open
+                    var existing = Projects.FirstOrDefault(p => p.Id == project.Id);
+                    if (existing != null)
+                    {
+                        SelectedProject = existing;
+                        // Maybe reload data?
+                    }
+                    else
+                    {
+                        Projects.Add(project);
+                        SelectedProject = project;
+                        _loadedProjectIds.Add(project.Id);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            System.Windows.MessageBox.Show(string.Format(_localizationService.GetString("Error_OpeningProject"), ex.Message), _localizationService.GetString("Title_Error"));
-        }
-        finally
-        {
-            IsBusy = false;
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(string.Format(_localizationService.GetString("Error_OpeningProject"), ex.Message), _localizationService.GetString("Title_Error"));
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
     }
 
@@ -723,6 +539,26 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    private bool FilterTranslationUnit(object obj)
+    {
+        if (obj is not TranslationUnit unit) return false;
+
+        if (SelectedFilterContext != "All")
+        {
+            if (string.IsNullOrEmpty(unit.Context) || !unit.Context.Contains(SelectedFilterContext, StringComparison.OrdinalIgnoreCase))
+                return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            bool match = (unit.OriginalText?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false)
+                      || (unit.HumanTranslation?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false)
+                      || (unit.Context?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false);
+            if (!match) return false;
+        }
+
+        return true;
+    }
 
     [RelayCommand]
     private async Task BatchApplyTranslation()
@@ -742,15 +578,15 @@ public partial class MainViewModel : ObservableObject
 
             if (candidates == null || candidates.Count == 0)
             {
-                 _snackbarService.Show(_localizationService.GetString("Title_Info"), _localizationService.GetString("Msg_NoCandidates"), ControlAppearance.Info, new SymbolIcon(SymbolRegular.Info24), TimeSpan.FromSeconds(2));
+                 _snackbarService.Show("Info", "No other units with same original text found.", ControlAppearance.Info, new SymbolIcon(SymbolRegular.Info24), TimeSpan.FromSeconds(2));
                  return;
             }
 
             if (candidates.Any(u => !string.IsNullOrEmpty(u.HumanTranslation)))
             {
                 var result = System.Windows.MessageBox.Show(
-                    _localizationService.GetString("Msg_ConfirmOverwrite"), 
-                    _localizationService.GetString("Title_ConfirmOverwrite"), 
+                    "Some units already have translations. Overwrite?", 
+                    "Confirm Overwrite", 
                     System.Windows.MessageBoxButton.YesNo, 
                     System.Windows.MessageBoxImage.Question);
                 
@@ -765,7 +601,7 @@ public partial class MainViewModel : ObservableObject
                 }
             });
             
-            _snackbarService.Show(_localizationService.GetString("Title_Success"), string.Format(_localizationService.GetString("Msg_AppliedCount"), candidates.Count), ControlAppearance.Success, new SymbolIcon(SymbolRegular.CheckmarkCircle24), TimeSpan.FromSeconds(2));
+            _snackbarService.Show("Success", $"Applied to {candidates.Count} units.", ControlAppearance.Success, new SymbolIcon(SymbolRegular.CheckmarkCircle24), TimeSpan.FromSeconds(2));
         }
         finally
         {
@@ -832,7 +668,7 @@ public partial class MainViewModel : ObservableObject
         }
         else
         {
-             System.Windows.MessageBox.Show(_localizationService.GetString("Msg_NotFound"));
+             System.Windows.MessageBox.Show("Not found.");
         }
     }
 
@@ -875,7 +711,7 @@ public partial class MainViewModel : ObservableObject
 
              if (itemsToUpdate.Count == 0) 
              {
-                 System.Windows.MessageBox.Show(_localizationService.GetString("Msg_NoOccurrences"));
+                 System.Windows.MessageBox.Show("No occurrences found.");
                  return;
              }
 
@@ -897,7 +733,7 @@ public partial class MainViewModel : ObservableObject
                  }
              });
              
-             System.Windows.MessageBox.Show(string.Format(_localizationService.GetString("Msg_ReplacedCount"), count));
+             System.Windows.MessageBox.Show(string.Format("Replaced {0} occurrences.", count));
          }
          finally
          {

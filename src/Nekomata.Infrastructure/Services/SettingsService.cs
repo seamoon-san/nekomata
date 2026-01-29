@@ -13,7 +13,6 @@ namespace Nekomata.Infrastructure.Services;
 public class SettingsService : ISettingsService
 {
     private readonly string _settingsPath;
-    private AppSettings? _cachedSettings;
 
     public SettingsService()
     {
@@ -27,27 +26,19 @@ public class SettingsService : ISettingsService
 
     public async Task<AppSettings> LoadSettingsAsync()
     {
-        if (_cachedSettings != null)
-        {
-            return _cachedSettings;
-        }
-
         if (!File.Exists(_settingsPath))
         {
-            _cachedSettings = CreateDefaultSettings();
-            return _cachedSettings;
+            return CreateDefaultSettings();
         }
 
         try
         {
             var json = await File.ReadAllTextAsync(_settingsPath);
-            _cachedSettings = JsonConvert.DeserializeObject<AppSettings>(json) ?? CreateDefaultSettings();
-            return _cachedSettings;
+            return JsonConvert.DeserializeObject<AppSettings>(json) ?? CreateDefaultSettings();
         }
         catch
         {
-            _cachedSettings = CreateDefaultSettings();
-            return _cachedSettings;
+            return CreateDefaultSettings();
         }
     }
 
@@ -78,7 +69,6 @@ public class SettingsService : ISettingsService
 
     public async Task SaveSettingsAsync(AppSettings settings)
     {
-        _cachedSettings = settings;
         var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
         await File.WriteAllTextAsync(_settingsPath, json);
     }

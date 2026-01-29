@@ -11,7 +11,6 @@ using System.Windows.Data;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System;
-using System.ComponentModel;
 
 namespace Nekomata.UI;
 
@@ -31,39 +30,6 @@ public partial class MainWindow : FluentWindow
         
         _snackbarService = snackbarService;
         snackbarService.SetSnackbarPresenter(this.SnackbarPresenter);
-
-        TranslationGrid.Loaded += TranslationGrid_Loaded;
-        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
-    }
-
-    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == "CurrentScrollOffset")
-        {
-            var scrollViewer = FindVisualChild<Controls.ScrollViewer>(TranslationGrid);
-            if (scrollViewer != null && Math.Abs(scrollViewer.VerticalOffset - ViewModel.CurrentScrollOffset) > 1.0)
-            {
-                scrollViewer.ScrollToVerticalOffset(ViewModel.CurrentScrollOffset);
-            }
-        }
-    }
-
-    private void TranslationGrid_Loaded(object sender, RoutedEventArgs e)
-    {
-        var scrollViewer = FindVisualChild<Controls.ScrollViewer>(TranslationGrid);
-        if (scrollViewer != null)
-        {
-            scrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
-            scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
-        }
-    }
-
-    private void ScrollViewer_ScrollChanged(object sender, Controls.ScrollChangedEventArgs e)
-    {
-        if (Math.Abs(ViewModel.CurrentScrollOffset - e.VerticalOffset) > 1.0)
-        {
-            ViewModel.CurrentScrollOffset = e.VerticalOffset;
-        }
     }
 
     private void Window_Drop(object sender, DragEventArgs e)
@@ -199,19 +165,6 @@ public partial class MainWindow : FluentWindow
         return null;
     }
 
-    private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
-    {
-        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-        {
-            var child = VisualTreeHelper.GetChild(parent, i);
-            if (child is T found) return found;
-
-            var result = FindVisualChild<T>(child);
-            if (result != null) return result;
-        }
-        return null;
-    }
-
     private void DataGridCell_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (sender is Controls.DataGridCell cell)
@@ -234,90 +187,6 @@ public partial class MainWindow : FluentWindow
                 CopyOriginalText(unit);
                 e.Handled = true;
             }
-        }
-    }
-
-    private void DataGrid_SelectionChanged(object sender, Controls.SelectionChangedEventArgs e)
-    {
-        if (sender is Controls.DataGrid dataGrid && dataGrid.SelectedItem != null)
-        {
-            dataGrid.ScrollIntoView(dataGrid.SelectedItem);
-        }
-    }
-
-    private void Expander_Expanded(object sender, RoutedEventArgs e)
-    {
-        UpdateGroupState(sender, false);
-    }
-
-    private void Expander_Collapsed(object sender, RoutedEventArgs e)
-    {
-        UpdateGroupState(sender, true);
-    }
-
-    private void Expander_Loaded(object sender, RoutedEventArgs e)
-    {
-        if (sender is Controls.Expander expander)
-        {
-            // Attach DataContextChanged listener to handle virtualization recycling
-            expander.DataContextChanged -= Expander_DataContextChanged;
-            expander.DataContextChanged += Expander_DataContextChanged;
-
-            RestoreExpansionState(expander);
-        }
-    }
-
-    private void Expander_Unloaded(object sender, RoutedEventArgs e)
-    {
-        if (sender is Controls.Expander expander)
-        {
-            expander.DataContextChanged -= Expander_DataContextChanged;
-        }
-    }
-
-    private void Expander_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-    {
-        if (sender is Controls.Expander expander)
-        {
-            RestoreExpansionState(expander);
-        }
-    }
-
-    private void RestoreExpansionState(Controls.Expander expander)
-    {
-        if (expander.DataContext is CollectionViewGroup group && DataContext is MainViewModel vm)
-        {
-            var name = group.Name?.ToString() ?? string.Empty;
-            
-            // Temporarily detach events to avoid triggering updates during state restore
-            expander.Expanded -= Expander_Expanded;
-            expander.Collapsed -= Expander_Collapsed;
-
-            if (vm.CollapsedGroupNames.Contains(name))
-            {
-                expander.IsExpanded = false;
-            }
-            else
-            {
-                expander.IsExpanded = true;
-            }
-
-            expander.Expanded += Expander_Expanded;
-            expander.Collapsed += Expander_Collapsed;
-        }
-    }
-
-    private void UpdateGroupState(object sender, bool isCollapsed)
-    {
-        if (sender is Controls.Expander expander &&
-            expander.DataContext is CollectionViewGroup group &&
-            DataContext is MainViewModel vm)
-        {
-            var name = group.Name?.ToString() ?? string.Empty;
-            if (isCollapsed)
-                vm.CollapsedGroupNames.Add(name);
-            else
-                vm.CollapsedGroupNames.Remove(name);
         }
     }
 

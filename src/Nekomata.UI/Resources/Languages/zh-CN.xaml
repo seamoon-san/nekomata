@@ -79,44 +79,4 @@
     <sys:String x:Key="Error_ApplyingTranslation">应用译文出错：{0}</sys:String>
     <sys:String x:Key="Error_OpeningProject">打开工程出错：{0}</sys:String>
     <sys:String x:Key="Error_ExportingProject">导出工程出错：{0}</sys:String>
-
-    <!-- UI Labels -->
-    <sys:String x:Key="Label_Search">搜索:</sys:String>
-    <sys:String x:Key="Label_Filter">筛选:</sys:String>
-    <sys:String x:Key="Label_Group">分组:</sys:String>
-    <sys:String x:Key="Label_Replace">替换</sys:String>
-    <sys:String x:Key="Placeholder_Search">搜索...</sys:String>
-    <sys:String x:Key="Label_ItemUnit">项</sys:String>
-    <sys:String x:Key="Format_GroupItemCount">{0} 项</sys:String>
-
-    <!-- Find/Replace Window -->
-    <sys:String x:Key="Title_FindReplace">查找和替换</sys:String>
-    <sys:String x:Key="Label_FindWhat">查找内容(原文/译文):</sys:String>
-    <sys:String x:Key="Label_ReplaceWith">替换为:</sys:String>
-    <sys:String x:Key="Btn_FindNext">查找下一个</sys:String>
-    <sys:String x:Key="Btn_Replace">替换</sys:String>
-    <sys:String x:Key="Btn_ReplaceAll">全部替换</sys:String>
-    <sys:String x:Key="Msg_NotFound">未找到。</sys:String>
-    <sys:String x:Key="Msg_NoOccurrences">未找到匹配项。</sys:String>
-    <sys:String x:Key="Msg_ReplacedCount">已替换 {0} 处。</sys:String>
-
-    <!-- Batch Apply -->
-    <sys:String x:Key="Title_Info">提示</sys:String>
-    <sys:String x:Key="Msg_NoCandidates">未找到其他原文相同的条目。</sys:String>
-    <sys:String x:Key="Title_ConfirmOverwrite">确认覆盖</sys:String>
-    <sys:String x:Key="Msg_ConfirmOverwrite">部分条目已有译文，是否覆盖？</sys:String>
-    <sys:String x:Key="Msg_AppliedCount">已应用到 {0} 个条目。</sys:String>
-
-    <!-- Filter Options -->
-    <sys:String x:Key="Filter_All">全部</sys:String>
-    <sys:String x:Key="Filter_Choice">选项</sys:String>
-    <sys:String x:Key="Filter_ShowText">显示文本</sys:String>
-    <sys:String x:Key="Filter_Name">名称</sys:String>
-    <sys:String x:Key="Filter_CommonEvent">公共事件</sys:String>
-
-    <!-- Group Options -->
-    <sys:String x:Key="Group_None">无</sys:String>
-    <sys:String x:Key="Group_Context">上下文</sys:String>
-    <sys:String x:Key="Group_OriginalText">原文</sys:String>
-    <sys:String x:Key="Group_HumanTranslation">译文</sys:String>
 </ResourceDictionary>

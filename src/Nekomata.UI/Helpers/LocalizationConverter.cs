@@ -11,27 +11,12 @@ public class LocalizationConverter : IValueConverter
     {
         if (value is string key)
         {
-            // Try to find a localized string.
-            // The key might be the raw value (e.g. "Show Text"), so we need to map it to a resource key if possible,
-            // or assume the caller provides a prefix in the parameter.
-            
-            string resourceKey = key;
-            if (parameter is string prefix)
+            var resource = Application.Current.TryFindResource(key);
+            if (resource is string str)
             {
-                // Map spaces to nothing or underscores if needed.
-                // Our keys are like "Filter_ShowText" for value "Show Text".
-                // So "Show Text" -> "ShowText".
-                var cleanKey = key.Replace(" ", "");
-                resourceKey = $"{prefix}_{cleanKey}";
+                return str.Replace("\\n", Environment.NewLine);
             }
-
-            if (Application.Current.TryFindResource(resourceKey) is string localized)
-            {
-                return localized;
-            }
-            
-            // Fallback: Return the original key if no translation found
-            return key;
+            return resource ?? key;
         }
         return value;
     }

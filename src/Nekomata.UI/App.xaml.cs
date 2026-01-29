@@ -94,15 +94,6 @@ public partial class App : Application
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
 
-        if (e.Args.Length > 0)
-        {
-            var path = e.Args[0];
-            if (System.IO.File.Exists(path) && System.IO.Path.GetExtension(path).Equals(".nkproj", StringComparison.OrdinalIgnoreCase))
-            {
-                await mainWindow.ViewModel.OpenProjectFromFileAsync(path);
-            }
-        }
-
         base.OnStartup(e);
     }
 

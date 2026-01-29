@@ -79,44 +79,4 @@
     <sys:String x:Key="Error_ApplyingTranslation">Error applying translation: {0}</sys:String>
     <sys:String x:Key="Error_OpeningProject">Error opening project: {0}</sys:String>
     <sys:String x:Key="Error_ExportingProject">Error exporting project: {0}</sys:String>
-
-    <!-- UI Labels -->
-    <sys:String x:Key="Label_Search">Search:</sys:String>
-    <sys:String x:Key="Label_Filter">Filter:</sys:String>
-    <sys:String x:Key="Label_Group">Group:</sys:String>
-    <sys:String x:Key="Label_Replace">Replace</sys:String>
-    <sys:String x:Key="Placeholder_Search">Search...</sys:String>
-    <sys:String x:Key="Label_ItemUnit">items</sys:String>
-    <sys:String x:Key="Format_GroupItemCount">{0} items</sys:String>
-
-    <!-- Find/Replace Window -->
-    <sys:String x:Key="Title_FindReplace">Find and Replace</sys:String>
-    <sys:String x:Key="Label_FindWhat">Find what (Original/Translation):</sys:String>
-    <sys:String x:Key="Label_ReplaceWith">Replace with:</sys:String>
-    <sys:String x:Key="Btn_FindNext">Find Next</sys:String>
-    <sys:String x:Key="Btn_Replace">Replace</sys:String>
-    <sys:String x:Key="Btn_ReplaceAll">Replace All</sys:String>
-    <sys:String x:Key="Msg_NotFound">Not found.</sys:String>
-    <sys:String x:Key="Msg_NoOccurrences">No occurrences found.</sys:String>
-    <sys:String x:Key="Msg_ReplacedCount">Replaced {0} occurrences.</sys:String>
-
-    <!-- Batch Apply -->
-    <sys:String x:Key="Title_Info">Info</sys:String>
-    <sys:String x:Key="Msg_NoCandidates">No other units with same original text found.</sys:String>
-    <sys:String x:Key="Title_ConfirmOverwrite">Confirm Overwrite</sys:String>
-    <sys:String x:Key="Msg_ConfirmOverwrite">Some units already have translations. Overwrite?</sys:String>
-    <sys:String x:Key="Msg_AppliedCount">Applied to {0} units.</sys:String>
-
-    <!-- Filter Options -->
-    <sys:String x:Key="Filter_All">All</sys:String>
-    <sys:String x:Key="Filter_Choice">Choice</sys:String>
-    <sys:String x:Key="Filter_ShowText">Show Text</sys:String>
-    <sys:String x:Key="Filter_Name">Name</sys:String>
-    <sys:String x:Key="Filter_CommonEvent">Common Event</sys:String>
-
-    <!-- Group Options -->
-    <sys:String x:Key="Group_None">None</sys:String>
-    <sys:String x:Key="Group_Context">Context</sys:String>
-    <sys:String x:Key="Group_OriginalText">Original Text</sys:String>
-    <sys:String x:Key="Group_HumanTranslation">Translation</sys:String>
 </ResourceDictionary>
