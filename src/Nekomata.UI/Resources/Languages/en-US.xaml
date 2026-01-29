@@ -66,6 +66,19 @@
     <sys:String x:Key="Filter_OpenProject">Nekomata Project|*.nkproj|JSON Files|*.json|All Files|*.*</sys:String>
     <sys:String x:Key="Filter_ExportProject">JSON Files|*.json|All Files|*.*</sys:String>
 
+    <!-- Filter Options (ComboBox) -->
+    <sys:String x:Key="Filter_All">All</sys:String>
+    <sys:String x:Key="Filter_Choice">Choice</sys:String>
+    <sys:String x:Key="Filter_Show Text">Show Text</sys:String>
+    <sys:String x:Key="Filter_Name">Name</sys:String>
+    <sys:String x:Key="Filter_CommonEvent">Common Event</sys:String>
+
+    <!-- Group Options (ComboBox) -->
+    <sys:String x:Key="Group_None">None</sys:String>
+    <sys:String x:Key="Group_Context">Context</sys:String>
+    <sys:String x:Key="Group_OriginalText">Original Text</sys:String>
+    <sys:String x:Key="Group_HumanTranslation">Translation</sys:String>
+
     <!-- Messages -->
     <sys:String x:Key="Msg_ProjectSaved">Project saved successfully.</sys:String>
     <sys:String x:Key="Msg_ProjectExported">Project exported successfully!</sys:String>

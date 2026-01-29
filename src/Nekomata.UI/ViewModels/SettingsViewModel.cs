@@ -94,6 +94,9 @@ public partial class SettingsViewModel : ObservableObject
         AvailableThemes.Add(new(_localizationService.GetString("Theme_Light"), "Light"));
         AvailableThemes.Add(new(_localizationService.GetString("Theme_Dark"), "Dark"));
         AvailableThemes.Add(new(_localizationService.GetString("Theme_Auto"), "Auto"));
+
+        // Force UI update for SelectedTheme as the list reconstruction might cause the ComboBox to lose selection
+        OnPropertyChanged(nameof(SelectedTheme));
     }
 
     [RelayCommand]

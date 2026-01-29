@@ -66,6 +66,19 @@
     <sys:String x:Key="Filter_OpenProject">Nekomata 工程|*.nkproj|JSON 文件|*.json|所有文件|*.*</sys:String>
     <sys:String x:Key="Filter_ExportProject">JSON 文件|*.json|所有文件|*.*</sys:String>
 
+    <!-- Filter Options (ComboBox) -->
+    <sys:String x:Key="Filter_All">全部</sys:String>
+    <sys:String x:Key="Filter_Choice">选项</sys:String>
+    <sys:String x:Key="Filter_Show Text">显示文本</sys:String>
+    <sys:String x:Key="Filter_Name">名字</sys:String>
+    <sys:String x:Key="Filter_CommonEvent">公共事件</sys:String>
+
+    <!-- Group Options (ComboBox) -->
+    <sys:String x:Key="Group_None">无</sys:String>
+    <sys:String x:Key="Group_Context">上下文</sys:String>
+    <sys:String x:Key="Group_OriginalText">原文</sys:String>
+    <sys:String x:Key="Group_HumanTranslation">译文</sys:String>
+
     <!-- Messages -->
     <sys:String x:Key="Msg_ProjectSaved">工程保存成功。</sys:String>
     <sys:String x:Key="Msg_ProjectExported">工程导出成功！</sys:String>
